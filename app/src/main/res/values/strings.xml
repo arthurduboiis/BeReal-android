@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">BeReal</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome!"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="what_s_your_name">What\'s your name ?</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="friend_icon_description">Friends icon</string>
+    <string name="profile_icon_description">profile_icon</string>
+    <string name="post_a_late_bereal">Post a Late BeReal</string>
 </resources>

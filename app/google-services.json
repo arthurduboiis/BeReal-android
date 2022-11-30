@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "157897877434",
+    "project_id": "bereal-cd148",
+    "storage_bucket": "bereal-cd148.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157897877434:android:f864e3182bcdcf15369f83",
+        "android_client_info": {
+          "package_name": "com.example.bereal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "157897877434-a2hiabdjl4gpr21ku1sstqriemgrf3du.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRv79SfSy_F4rn4TupigZEmPgFcxfuWt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "157897877434-a2hiabdjl4gpr21ku1sstqriemgrf3du.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
