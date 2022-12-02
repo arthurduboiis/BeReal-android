@@ -15,4 +15,8 @@
     <string name="friend_icon_description">Friends icon</string>
     <string name="profile_icon_description">profile_icon</string>
     <string name="post_a_late_bereal">Post a Late BeReal</string>
+    <string name="bereal">BeReal.</string>
+    <string name="logout">Logout</string>
+    <string name="add_to_my_friends">Add to my friends</string>
+    <string name="cancel">Cancel</string>
 </resources>

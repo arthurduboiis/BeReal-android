@@ -25,9 +25,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.bereal.MainActivity;
 import com.example.bereal.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,7 +41,9 @@ public class LoginActivity extends AppCompatActivity {
     EditText Musername, Mpassword;
     Button loginOrRegister;
     FirebaseAuth firebaseAuth;
+    FirebaseFirestore fStore;
     ProgressBar progressBar;
+    String userId;
 
 
     @Override
@@ -50,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         loginOrRegister = findViewById(R.id.login_btn);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.loading);
 
 
@@ -58,7 +67,6 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
-        Log.i("LoginActivity", "try log");
 
         loginOrRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,8 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                 String username = Musername.getText().toString().trim();
                 String password = Mpassword.getText().toString().trim();
 
-                //loginViewModel.loginDataChanged(username, password);
-                Log.i("LoginActivity", "click on the button");
+                //loginViewModel.loginDataChanged(username, password);;
                 progressBar.setVisibility(View.VISIBLE);
 
                 firebaseAuth.createUserWithEmailAndPassword(username,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -75,6 +82,22 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(LoginActivity.this,"User created", Toast.LENGTH_SHORT).show();
+                            userId = firebaseAuth.getCurrentUser().getUid();
+                            DocumentReference documentReference = fStore.collection("users").document(userId);
+                            HashMap<String,Object> user = new HashMap<>();
+                            user.put("username", username);
+                            Log.d("LoginActivity","come here ");
+                            documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d("LoginActivity", "On success profile is created for "+ userId);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d("LoginActivity", "on Failure : " + e.getMessage());
+                                }
+                            });
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         }else {
                             firebaseAuth.signInWithEmailAndPassword(username,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
