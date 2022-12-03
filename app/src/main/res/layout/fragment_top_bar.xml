@@ -21,6 +21,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:id="@+id/bereal_text_center"
             android:text="@string/bereal"
             android:textStyle="bold"
             android:textAlignment="center"

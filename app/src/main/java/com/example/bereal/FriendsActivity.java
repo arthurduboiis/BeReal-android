@@ -5,33 +5,27 @@ import static com.google.firebase.firestore.SetOptions.merge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.bereal.Entities.FriendDetails;
+import com.example.bereal.Entities.UserRequests;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +54,7 @@ public class FriendsActivity extends AppCompatActivity {
 
 
 
-        mUsersRef = FirebaseFirestore.getInstance().collection("Users");
+        //mUsersRef = FirebaseFirestore.getInstance().collection("Users");
         mRequestsRef = FirebaseFirestore.getInstance().collection("requests");
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -71,6 +65,42 @@ public class FriendsActivity extends AppCompatActivity {
 
         email_friends = findViewById(R.id.email_friends_request);
         addFriendBtn = findViewById(R.id.btn_add_friends);
+
+        mRequestsRef.document(currentUser.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if(documentSnapshot.getData() != null){
+                    UserRequests friendReceive = documentSnapshot.toObject(UserRequests.class);
+                    assert friendReceive != null;
+                    friendReceive.getFriendsRequests().forEach((key, value)->{
+                        Log.d(TAG, "onComplete: " + key + " " + value);
+                        FriendDetails friendDetails = value.get(0) ;
+                        Log.d(TAG, "onComplete: " + friendDetails.getUsername() + " " + friendDetails.getStatus());
+                        FriendsRequest friendsRequest = new FriendsRequest();
+
+
+                        Bundle bundle = new Bundle();
+                        bundle.putString("username", friendDetails.getUsername());
+                        bundle.putString("userId", key);
+
+
+                        friendsRequest.setArguments(bundle);
+                        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
+                                .add(R.id.fragment_new_friends_request, FriendsRequest.class, bundle)
+                                .commit();
+                    });
+
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "Nothing to show");
+            }
+        });
 
 
 
@@ -86,7 +116,7 @@ public class FriendsActivity extends AppCompatActivity {
                         Log.d(TAG, "get adresse mail " + result.getId());
                     }
                 });
-                //performAction("trg'çèfh'h!'éfneidfsjkn");
+
             }
         });
 
@@ -94,20 +124,15 @@ public class FriendsActivity extends AppCompatActivity {
 
     private void performAction(String userId, String username) {
         if(currentState.equals("Nothing_happen")){
-            HashMap<String, Object> ownRequests = new HashMap<>();
 
-            //ownRequests.put("userId",userId );
 
-            HashMap<String, String> userData = new HashMap<>();
-            userData.put("status","sending");
-            userData.put("username", username);
+            UserRequests userRequester = new UserRequests();
+            ArrayList<FriendDetails> friendDetails = new ArrayList<>();
+            friendDetails.add(new FriendDetails("sending", username));
+            userRequester.setOwnRequests(new HashMap<>(Collections.singletonMap(userId, friendDetails)));
 
-            ownRequests.put(userId, userData);
 
-            Map<String, Object> docData = new HashMap<>();
-            docData.put("ownRequests", ownRequests);
-
-            mRequestsRef.document(currentUser.getUid()).set(docData, merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            mRequestsRef.document(currentUser.getUid()).set(userRequester, merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
                     Toast.makeText(FriendsActivity.this, "Friends add successfully", Toast.LENGTH_SHORT).show();
@@ -122,22 +147,17 @@ public class FriendsActivity extends AppCompatActivity {
                     Log.w(TAG, "Error writing document", e);
                 }
             });
-            docData.remove("ownRequests");
-            ownRequests.remove(userId);
 
-            HashMap<String, String> userDataReceiver = new HashMap<>();
-            userDataReceiver.put("status","pending");
-            userDataReceiver.put("username", currentUser.getEmail());
+            UserRequests userReceiver = new UserRequests();
+            ArrayList<FriendDetails> friendDetailsReceiver = new ArrayList<>();
+            friendDetailsReceiver.add(new FriendDetails("receiving", currentUser.getEmail()));
+            userReceiver.setFriendsRequests(new HashMap<>(Collections.singletonMap(currentUser.getUid(), friendDetailsReceiver)));
 
-
-            ownRequests.put(currentUser.getUid(), userDataReceiver);
-
-
-            docData.put("friendsRequests", ownRequests);
-            mRequestsRef.document(userId).set(docData, merge());
+            mRequestsRef.document(userId).set(userReceiver, merge());
 
         }
         if(currentState.equals("pending_request")){
+
 
             Map<String, Object> docData = new HashMap<>();
             docData.put("ownRequests." +userId, FieldValue.delete());
@@ -155,38 +175,7 @@ public class FriendsActivity extends AppCompatActivity {
                     currentState = "Nothing_happen";
                 }
             });
-        }/*
-        if(currentState.equals("wainting_accept")){
-            mRequestRef.child(fUser.getUid()).child(userId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-                        HashMap hashMap = new HashMap();
-                        hashMap.put("status","friend");
-                        hashMap.put("username", email_friends.getText().toString().trim());
-                        friendRef.child(fUser.getUid()).child(userId).updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener() {
-                            @Override
-                            public void onComplete(@NonNull Task task) {
-                                if(task.isSuccessful()){
-                                    friendRef.child(userId).child(fUser.getUid()).updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener() {
-                                        @Override
-                                        public void onComplete(@NonNull Task task) {
-                                            Toast.makeText(FriendsActivity.this, "You added friend ", Toast.LENGTH_SHORT).show();
-                                            currentState = "friends";
-                                            //TODO clean edit text and state etc
-
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-                }
-            });
         }
-        if(currentState.equals("friends")){
-
-        }*/
 
     }
 }

@@ -8,18 +8,16 @@ import androidx.fragment.app.Fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.example.bereal.ui.login.LoginActivity;
-import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST = 1888;
     private ImageView imageBeRealFront;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
+
+
+    AlarmManager alarmManager;
+    PendingIntent pi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Intent intent = new Intent(this, Broadcast.class);
+
+        pi = PendingIntent.getBroadcast(this, 1, intent, 0);
+
+        alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+
+        final int time = 86400; //24 hours
+
+        if (alarmManager != null) {
+            alarmManager.setInexactRepeating(AlarmManager.RTC, (time * 1000), time * 1000, pi);
+        }
 
     }
 
