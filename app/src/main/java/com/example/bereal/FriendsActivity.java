@@ -41,7 +41,7 @@ public class FriendsActivity extends AppCompatActivity {
     FirebaseFirestore fStore;
     FirebaseUser currentUser;
 
-    CollectionReference mUsersRef, mRequestsRef;
+    CollectionReference  mRequestsRef;
 
     String currentState = "Nothing_happen";
 
@@ -54,7 +54,7 @@ public class FriendsActivity extends AppCompatActivity {
 
 
 
-        //mUsersRef = FirebaseFirestore.getInstance().collection("Users");
+
         mRequestsRef = FirebaseFirestore.getInstance().collection("requests");
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -66,58 +66,44 @@ public class FriendsActivity extends AppCompatActivity {
         email_friends = findViewById(R.id.email_friends_request);
         addFriendBtn = findViewById(R.id.btn_add_friends);
 
-        mRequestsRef.document(currentUser.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                DocumentSnapshot documentSnapshot = task.getResult();
-                if(documentSnapshot.getData() != null){
-                    UserRequests friendReceive = documentSnapshot.toObject(UserRequests.class);
-                    assert friendReceive != null;
-                    friendReceive.getFriendsRequests().forEach((key, value)->{
-                        Log.d(TAG, "onComplete: " + key + " " + value);
-                        FriendDetails friendDetails = value.get(0) ;
-                        Log.d(TAG, "onComplete: " + friendDetails.getUsername() + " " + friendDetails.getStatus());
-                        FriendsRequest friendsRequest = new FriendsRequest();
+        mRequestsRef.document(currentUser.getUid()).get().addOnCompleteListener(task -> {
+            DocumentSnapshot documentSnapshot = task.getResult();
+            if(documentSnapshot.getData() != null){
+                UserRequests friendReceive = documentSnapshot.toObject(UserRequests.class);
+                assert friendReceive != null;
+                friendReceive.getFriendsRequests().forEach((key, value)->{
+                    Log.d(TAG, "onComplete: " + key + " " + value);
+                    FriendDetails friendDetails = value.get(0) ;
+                    Log.d(TAG, "onComplete: " + friendDetails.getUsername() + " " + friendDetails.getStatus());
+                    FriendsRequest friendsRequest = new FriendsRequest();
 
 
-                        Bundle bundle = new Bundle();
-                        bundle.putString("username", friendDetails.getUsername());
-                        bundle.putString("userId", key);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username", friendDetails.getUsername());
+                    bundle.putString("userId", key);
 
 
-                        friendsRequest.setArguments(bundle);
-                        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
-                                .add(R.id.fragment_new_friends_request, FriendsRequest.class, bundle)
-                                .commit();
-                    });
-
-
-                }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "Nothing to show");
-            }
-        });
-
-
-
-        addFriendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("FriendsActivity", "Click");
-                fStore.collection("users").whereEqualTo("username", email_friends.getText().toString().trim()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        DocumentSnapshot result = task.getResult().getDocuments().get(0);
-                        performAction(result.getId(), email_friends.getText().toString().trim());
-                        Log.d(TAG, "get adresse mail " + result.getId());
-                    }
+                    friendsRequest.setArguments(bundle);
+                    getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
+                            .add(R.id.fragment_new_friends_request, FriendsRequest.class, bundle)
+                            .commit();
                 });
 
+
             }
+
+        }).addOnFailureListener(e -> Log.d(TAG, "Nothing to show"));
+
+
+
+        addFriendBtn.setOnClickListener(view -> {
+            Log.d("FriendsActivity", "Click");
+            fStore.collection("users").whereEqualTo("username", email_friends.getText().toString().trim()).get().addOnCompleteListener(task -> {
+                DocumentSnapshot result = task.getResult().getDocuments().get(0);
+                performAction(result.getId(), email_friends.getText().toString().trim());
+                Log.d(TAG, "get adresse mail " + result.getId());
+            });
+
         });
 
     }
@@ -132,20 +118,14 @@ public class FriendsActivity extends AppCompatActivity {
             userRequester.setOwnRequests(new HashMap<>(Collections.singletonMap(userId, friendDetails)));
 
 
-            mRequestsRef.document(currentUser.getUid()).set(userRequester, merge()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    Toast.makeText(FriendsActivity.this, "Friends add successfully", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Request sended");
-                    currentState = "pending_request";
-                    addFriendBtn.setText(R.string.cancel);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(FriendsActivity.this,"Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "Error writing document", e);
-                }
+            mRequestsRef.document(currentUser.getUid()).set(userRequester, merge()).addOnSuccessListener(unused -> {
+                Toast.makeText(FriendsActivity.this, "Friends add successfully", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Request sended");
+                currentState = "pending_request";
+                addFriendBtn.setText(R.string.cancel);
+            }).addOnFailureListener(e -> {
+                Toast.makeText(FriendsActivity.this,"Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Error writing document", e);
             });
 
             UserRequests userReceiver = new UserRequests();
@@ -168,12 +148,9 @@ public class FriendsActivity extends AppCompatActivity {
             Map<String, Object> docDataReceiver = new HashMap<>();
             docDataReceiver.put("friendsRequests." + currentUser.getUid(), FieldValue.delete());
 
-            mRequestsRef.document(userId).update(docDataReceiver).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    addFriendBtn.setText(R.string.add_to_my_friends);
-                    currentState = "Nothing_happen";
-                }
+            mRequestsRef.document(userId).update(docDataReceiver).addOnSuccessListener(unused -> {
+                addFriendBtn.setText(R.string.add_to_my_friends);
+                currentState = "Nothing_happen";
             });
         }
 

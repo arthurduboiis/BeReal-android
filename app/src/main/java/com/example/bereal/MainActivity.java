@@ -19,10 +19,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.bereal.Services.Broadcast;
+
 public class MainActivity extends AppCompatActivity {
 
     Fragment fragment;
-    private static final int CAMERA_REQUEST = 1888;
+    private static final int CAMERA_REQUEST = 86400;
     private ImageView imageBeRealFront;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
 
-        final int time = 86400; //24 hours
+        final int time = 86400; //in secs, mean 24 hours
 
         if (alarmManager != null) {
             alarmManager.setInexactRepeating(AlarmManager.RTC, (time * 1000), time * 1000, pi);

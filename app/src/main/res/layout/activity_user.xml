@@ -19,6 +19,20 @@
         android:orientation="horizontal"
         tools:layout="@layout/fragment_top_bar" />
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_email_user"
+        android:text="@string/username_gmail_com"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_logout"
+        />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="50dp"
