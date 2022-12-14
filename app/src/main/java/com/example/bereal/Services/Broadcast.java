@@ -39,6 +39,7 @@ public class Broadcast extends BroadcastReceiver {
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
             mChannel.setDescription(Description);
+
             mChannel.enableLights(true);
             mChannel.setLightColor(Color.RED);
             mChannel.enableVibration(true);
@@ -48,7 +49,7 @@ public class Broadcast extends BroadcastReceiver {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setSmallIcon(R.drawable.ic_notif_icon)
                 .setContentTitle(title)
                 .setTicker(a)
                 .setContentText(description);
