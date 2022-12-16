@@ -23,7 +23,7 @@ import com.example.bereal.Services.Broadcast;
 
 public class MainActivity extends AppCompatActivity {
 
-    Fragment fragment;
+
     private static final int CAMERA_REQUEST = 86400;
     private ImageView imageBeRealFront;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     AlarmManager alarmManager;
     PendingIntent pi;
+    Button photoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         checkPermission("Location", 1);
 
         this.imageBeRealFront = (ImageView)this.findViewById(R.id.bereal_image_front);
-        Button photoButton = (Button) this.findViewById(R.id.post_bereal_btn);
+        photoButton = (Button) this.findViewById(R.id.post_bereal_btn);
         photoButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -72,15 +73,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void takePhoto(){
-
-    }
 
 
-    // Function to check and request permission
+
     public void checkPermission(String permission, int requestCode)
     {
-        // Checking if permission is not granted
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, requestCode);
@@ -117,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             imageBeRealFront.setImageBitmap(photo);
+            photoButton.setEnabled(false);
         }
     }
 }

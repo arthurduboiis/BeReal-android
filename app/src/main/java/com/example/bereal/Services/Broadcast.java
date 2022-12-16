@@ -35,7 +35,7 @@ public class Broadcast extends BroadcastReceiver {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             CHANNEL_ID = "my_channel_01";
             CharSequence name = "my_channel";
-            String Description = "This is my channel";
+            String Description = "channel bereal";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
             mChannel.setDescription(Description);
